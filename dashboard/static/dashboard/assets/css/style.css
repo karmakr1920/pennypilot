@@ -23489,7 +23489,7 @@ dl li {
 /* === Landing screens === */
 /* Auth */
 .auth.login-bg {
-  background: url("../images/auth/Login_bg.jpg");
+  background: url("../images/auth/Login_bg.webp");
   background-size: cover;
 }
 .auth .login-half-bg {
