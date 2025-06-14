@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Expense, Category,User,MonthlyBudget
+from .models import Expense, Category,User,MonthlyBudget,PasswordResetToken
 from django.db.models import Sum,Count
 from django.contrib import messages
 import calendar
@@ -10,7 +10,8 @@ from django.contrib.auth import login,logout,authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 import re
-
+import uuid
+from django.db.models import Q
 
 from django.contrib import messages
 from django.contrib.auth import login
@@ -27,7 +28,7 @@ def register_view(request):
         password2 = request.POST.get('password2')
         consent = request.POST.get('consent')
 
-        # Store form data to repopulate on error
+        # Store form data to repopulate on warning
         form_data = {
             'username': username or '',
             'email': email or '',
@@ -87,7 +88,7 @@ def update_user_view(request):
         current_password = request.POST.get('current_password')
         new_password = request.POST.get('new_password')
 
-        # Store form data to repopulate on error
+        # Store form data to repopulate on warning
         form_data = {
             'username': username or '',
             'email': email or '',
@@ -434,8 +435,8 @@ def set_monthly_budget(request):
         try:
             amount = float(amount)
             if amount < 0:
-                raise ValueError("Budget cannot be negative")
-        except ValueError:
+                raise Valuewarning("Budget cannot be negative")
+        except Valuewarning:
             messages.warning(request, "Please enter a valid positive number for budget.")
             return redirect('set_monthly_budget')
 
@@ -527,3 +528,87 @@ def logout_view(request):
     logout(request)
     messages.info(request, "Logged out successfully.")
     return redirect('home')
+
+def forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = User.objects.get(email=email)
+            # Generate a unique token
+            token = uuid.uuid4()
+            user.password_reset_token = token
+            user.save()
+            # Redirect to reset_password view with the token
+            return redirect('reset_password', token=token)
+        except User.DoesNotExist:
+            messages.warning(request, 'Email not found.')
+            return render(request, 'dashboard/forgot_password.html')
+    return render(request, 'dashboard/forgot_password.html')
+
+def reset_password(request, token=None):
+    form_data = {}
+
+    if request.method == 'POST':
+        if not token:
+            # Handle username_or_email submission to generate token
+            username_or_email = request.POST.get('username_or_email')
+            if not username_or_email:
+                messages.warning(request, "Username or email is required.")
+                return render(request, 'dashboard/forgot_password.html', {'form_data': {'username_or_email': username_or_email}})
+
+            try:
+                # Look up user by username or email
+                user = User.objects.get(Q(username=username_or_email) | Q(email=username_or_email))
+                # Delete any existing tokens for this user
+                PasswordResetToken.objects.filter(user=user).delete()
+                # Generate a new token
+                reset_token = PasswordResetToken.objects.create(user=user)
+                # Redirect to reset_password with token
+                return redirect('reset_password', token=reset_token.token)
+            except User.DoesNotExist:
+                messages.warning(request, "User with this username or email does not exist.")
+                return render(request, 'dashboard/forgot_password.html', {'form_data': {'username_or_email': username_or_email}})
+
+        else:
+            # Handle password reset with token
+            try:
+                reset_token = PasswordResetToken.objects.get(token=token)
+                if reset_token.is_expired():
+                    messages.warning(request, "Reset token has expired.")
+                    reset_token.delete()
+                    return redirect('forgot_password')
+                user = reset_token.user
+            except PasswordResetToken.DoesNotExist:
+                messages.warning(request, "Invalid or expired reset token.")
+                return redirect('forgot_password')
+
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+            form_data = {
+                'new_password': new_password,
+                'confirm_password': confirm_password
+            }
+
+            # Basic validation
+            if not new_password or not confirm_password:
+                messages.warning(request, "All fields are required.")
+                return render(request, 'dashboard/forgot_password.html', {'form_data': form_data, 'token': token})
+
+            if new_password != confirm_password:
+                messages.warning(request, "Passwords do not match.")
+                return render(request, 'dashboard/forgot_password.html', {'form_data': form_data, 'token': token})
+
+            # Additional password validation
+            if len(new_password) < 8:
+                messages.warning(request, "Password must be at least 8 characters long.")
+                return render(request, 'dashboard/forgot_password.html', {'form_data': form_data, 'token': token})
+
+            # Update password
+            user.set_password(new_password)
+            user.save()
+            # Delete the token after use
+            PasswordResetToken.objects.filter(token=token).delete()
+            messages.success(request, "Password reset successfully. Please log in.")
+            return redirect('login')
+
+    return render(request, 'dashboard/forgot_password.html', {'form_data': form_data, 'token': token})

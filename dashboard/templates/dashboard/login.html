@@ -50,7 +50,7 @@
                                   {% if form_data.remember_me %}checked{% endif %}>
                             <label class="form-check-label" for="remember_me">Remember me</label>
                         </div>
-                        <a href="#" class="forgot-pass">Forgot password</a>
+                        <a href="{% url 'forgot_password' %}" class="forgot-pass">Forgot password</a>
                     </div>
                     <div class="text-center d-grid gap-2">
                         <button type="submit" class="btn btn-primary btn-block">Login</button>
