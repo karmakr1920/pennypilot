@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>Login PennyPilot</title>
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/mdi/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/ti-icons/css/themify-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/css/vendor.bundle.base.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/css/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'dashboard/assets/images/favicon.png' %}" />
+  </head>
+  <body>
+    <div class="container-scroller">
+    <div class="container-fluid page-body-wrapper full-page-wrapper">
+        <div class="row w-100">
+        <div class="content-wrapper full-page-wrapper d-flex align-items-center auth login-bg">
+            <div class="card col-lg-4 mx-auto">
+            <div class="card-body px-5 py-5">
+                <h3 class="card-title text-start mb-3">Set Monthly Budget for {{ month_name }} {{ year }}</h3>
+                <!-- Display messages -->
+                {% if messages %}
+                <div class="alert alert-dismissible fade show">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="amount">Budget Amount (₹) *</label>
+                    <input 
+                    type="number" 
+                    step="0.01" 
+                    name="amount" 
+                    id="amount" 
+                    class="form-control p_input" 
+                    placeholder="Monthly Budget Amount" 
+                    required
+                    value="{{ budget.amount|default:'' }}"
+                    min="0"
+                    >
+                </div>
+                <div class="text-center d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-block">Save Budget</button>
+                </div>
+                </form>
+                <p class="text-center mt-3">
+                <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                    <i class="mdi mdi-arrow-left me-2"></i>Back to Dashboard
+                </a>
+                </p>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+    <script src="{% static 'dashboard/assets/vendors/js/vendor.bundle.base.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/off-canvas.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/misc.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/settings.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/todolist.js' %}"></script>
+  </body>
+</html>

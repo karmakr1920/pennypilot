@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>Login PennyPilot</title>
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/mdi/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/ti-icons/css/themify-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/css/vendor.bundle.base.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/css/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'dashboard/assets/images/favicon.png' %}" />
+  </head>
+  <body>
+    <div class="container-scroller">
+      <div class="container-fluid page-body-wrapper full-page-wrapper">
+        <div class="row w-100">
+          <div class="content-wrapper full-page-wrapper d-flex align-items-center auth login-bg">
+            <div class="card col-lg-4 mx-auto">
+              <div class="card-body px-5 py-5">
+                <h3 class="card-title text-start mb-3">Update Expense</h3>
+                <form method="post" novalidate>
+                  {% csrf_token %}
+
+                  <!-- Title -->
+                  <div class="form-group">
+                    <label for="title">Title *</label>
+                    <input 
+                      type="text" 
+                      name="title" 
+                      id="title" 
+                      class="form-control p_input" 
+                      required
+                      value="{{ expense.title }}"
+                    >
+                  </div>
+
+                  <!-- Amount -->
+                  <div class="form-group">
+                    <label for="amount">Amount (₹) *</label>
+                    <input 
+                      type="number" 
+                      step="0.01" 
+                      name="amount" 
+                      id="amount" 
+                      class="form-control p_input" 
+                      required
+                      value="{{ expense.amount }}"
+                    >
+                  </div>
+
+                  <!-- Notes -->
+                  <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea 
+                      name="notes" 
+                      id="notes" 
+                      class="form-control p_input" 
+                      style="height: 100px"
+                    >{{ expense.notes }}</textarea>
+                  </div>
+
+                  <!-- Category Dropdown -->
+                  <div class="form-group">
+                    <label for="category">Category *</label>
+                    <select 
+                      name="category" 
+                      id="category" 
+                      class="form-control p_input" 
+                      required
+                      onchange="toggleNewCategoryInput(this.value)"
+                    >
+                      <option value="" disabled {% if not expense.category %}selected{% endif %}>Select Category</option>
+                      {% for cat in categories %}
+                        <option value="{{ cat.category }}" {% if expense.category and expense.category.category == cat.category %}selected{% endif %}>
+                          {{ cat.category }}
+                        </option>
+                      {% endfor %}
+                      <option value="__new__">+ Add New Category</option>
+                    </select>
+                  </div>
+
+                  <!-- New Category Input -->
+                  <div class="form-group" id="new-category-wrapper" style="display:none;">
+                    <label for="new_category">New Category *</label>
+                    <input 
+                      type="text" 
+                      name="new_category" 
+                      id="new_category" 
+                      class="form-control p_input"
+                    >
+                  </div>
+
+                  <!-- Paid Date -->
+                  <div class="form-group">
+                    <label for="paid_date">Payable Date *</label>
+                    <input 
+                      type="date" 
+                      name="paid_date" 
+                      id="paid_date" 
+                      class="form-control p_input" 
+                      required
+                      value="{{ expense.paid_date|date:'Y-m-d' }}"
+                    >
+                  </div>
+
+                  <!-- Submit -->
+                  <div class="text-center d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-block">Update Expense</button>
+                  </div>
+
+                  <!-- Back to Dashboard -->
+                  <p class="text-center mt-3">
+                    <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}"          class="text-decoration-none">
+                        <i class="mdi mdi-arrow-left me-2"></i>Back
+                    </a>
+                  </p>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JS: Toggle Logic -->
+    <script>
+      function toggleNewCategoryInput(value) {
+        const newWrapper = document.getElementById('new-category-wrapper');
+        const newInput = document.getElementById('new_category');
+        const categorySelect = document.getElementById('category');
+
+        if (value === '__new__') {
+          newWrapper.style.display = 'block';
+          newInput.required = true;
+          categorySelect.required = false;
+        } else {
+          newWrapper.style.display = 'none';
+          newInput.required = false;
+          newInput.value = '';
+          categorySelect.required = true;
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        toggleNewCategoryInput(document.getElementById('category').value);
+      });
+    </script>
+    <script src="{% static 'dashboard/assets/vendors/js/vendor.bundle.base.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/off-canvas.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/misc.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/settings.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/todolist.js' %}"></script>
+  </body>
+</html>

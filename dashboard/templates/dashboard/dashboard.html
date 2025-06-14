@@ -1,0 +1,238 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+  <div class="main-panel">
+    <div class="content-wrapper">
+      <!-- Custom Toast Container -->
+      <div class="custom-toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="custom-toast {% if message.tags == 'success' %}bg-success{% elif message.tags == 'error' %}bg-danger{% else %}bg-info{% endif %} text-white border-0 shadow" data-delay="5000">
+              <div class="d-flex align-items-center text-small p-2">
+                <i class="mdi {% if message.tags == 'success' %}mdi-check-circle{% elif message.tags == 'error' %}mdi-alert-circle{% else %}mdi-information{% endif %} me-2"></i>
+                <span class="toast-message">{{ message }}</span>
+                <button type="button" class="btn-close btn-close-white ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+              </div>
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <div class="row">
+        <div class="col-sm-4 grid-margin">
+          <div class="card">
+            <div class="card-body">
+              <h5>Total Expenses</h5>
+              <div class="row">
+                <div class="col-8 col-sm-12 col-xl-8 my-auto">
+                  <div class="d-flex d-sm-block d-md-flex align-items-center">
+                    <h2 class="mb-0">₹{{ total_expenses }}</h2>
+                  </div>
+                  {% if month_name %}
+                    <h6 class="text-muted font-weight-normal">Current Month - {{month_name}}</h6>
+                  {% endif %}
+                </div>
+                <div class="col-4 col-sm-12 col-xl-4 text-center text-xl-right">
+                  <i class="icon-lg mdi mdi-wallet text-primary ml-auto"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-4 grid-margin">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex d-sm-block d-md-flex align-items-center">
+                <h5>Monthly Budget</h5>
+                <a href="{% url 'set_monthly_budget' %}" class="text-warning ms-2 mb-2 text-small text-decoration-none">Set / Update</a>
+              </div>
+              <div class="row">
+                <div class="col-8 col-sm-12 col-xl-8 my-auto">
+                  <div class="d-flex d-sm-block d-md-flex align-items-center">
+                    <h2 class="mb-0">{{ monthly_budget }}</h2>
+                  </div>
+                  {% if month_name %}
+                    <h6 class="text-muted font-weight-normal">Current Month - {{month_name}}</h6>
+                  {% endif %}
+                </div>
+                <div class="col-4 col-sm-12 col-xl-4 text-center text-xl-right">
+                  <i class="icon-lg mdi mdi-piggy-bank text-warning ml-auto"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-4 grid-margin">
+          <div class="card">
+            <div class="card-body">
+              <h5>Remaining Budget</h5>
+              <div class="row">
+                <div class="col-8 col-sm-12 col-xl-8 my-auto">
+                  <div class="d-flex d-sm-block d-md-flex align-items-center">
+                    <h2 class="mb-0 {% if remaining_budget < 0 %}text-danger{% endif %}">₹{{ remaining_budget }}</h2>
+                  </div>
+                  {% if month_name %}
+                    <h6 class="text-muted font-weight-normal">Current Month - {{ month_name }}</h6>
+                  {% endif %}
+                  {% if remaining_budget < 0 %}
+                    <div class="alert alert-danger py-1 px-2 small mt-2 mb-0">
+                      <strong>Attention required:</strong> Monthly budget crossed!
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="col-4 col-sm-12 col-xl-4 text-center text-xl-right">
+                  <i class="icon-lg mdi mdi-cash {% if remaining_budget < 0 %}text-danger{% else %}text-success{% endif %} ml-auto"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Category-wise Expenses</h4>
+                    <div class="position-relative">
+                        <div class="daoughnutchart-wrapper">
+                            <canvas id="transaction-history" class="transaction-chart"></canvas>
+                            <div id="chart-tooltip" style="position: absolute; display: none; background: rgba(0, 0, 0, 0.8); color: #FFFFFF; padding: 5px 10px; border-radius: 3px; font-size: 12px; pointer-events: none; z-index: 1000;"></div>
+                        </div>
+                        <div class="custom-value">₹{{ total_expenses|floatformat:2 }} <span>Total</span></div>
+                    </div>
+                    {% if has_category_data %}
+                        {% for cat in by_category %}
+                            <div class="bg-gray-dark d-flex d-md-block d-xl-flex flex-row py-3 px-4 px-md-3 px-xl-4 rounded mt-3">
+                                <div class="text-md-right text-xl-left">
+                                    <h6 class="mb-1">{{ cat.category__category }}</h6>
+                                    <p class="text-muted mb-0">{{ month_name }} {{ year_name }}</p>
+                                </div>
+                                <div class="align-self-center flex-grow text-end text-md-right text-xl-right py-md-2 py-xl-0">
+                                    <h6 class="font-weight-bold mb-0">₹{{ cat.total|floatformat:2 }}</h6>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="bg-gray-dark d-flex d-md-block d-xl-flex flex-row py-3 px-4 px-md-3 px-xl-4 rounded mt-3">
+                            <div class="text-md-right text-xl-left">
+                                <h6 class="mb-1">No expenses</h6>
+                                <p class="text-muted mb-0">{{ month_name }} {{ year_name }}</p>
+                            </div>
+                            <div class="align-self-center flex-grow text-end text-md-right text-xl-right py-md-2 py-xl-0">
+                                <h6 class="font-weight-bold mb-0">₹0.00</h6>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8 grid-margin stretch-card">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex flex-row justify-content-between">
+                <h4 class="card-title mb-1">Recent Expenses</h4>
+                <p class="text-muted mb-1">Your expense status</p>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <div class="preview-list">
+                    {% load expense_filters %}
+                    {% for expense in expenses %}
+                      <div class="preview-item {% if not forloop.last %}border-bottom{% endif %}">
+                        <div class="preview-thumbnail">
+                          <div class="preview-icon {{ expense.category.category|get_category_bg_class }}">
+                            <i class="icon-lg mdi {{ expense.category.category|get_category_icon_class }}"></i>
+                          </div>
+                        </div>
+                        <div class="preview-item-content d-sm-flex flex-grow">
+                          <div class="flex-grow">
+                            <h6 class="preview-subject">{{ expense.title }}</h6>
+                            <p class="text-muted mb-0">Category: {{ expense.category }}</p>
+                          </div>
+                          <div class="mr-auto text-sm-end pt-2 pt-sm-0">
+                            <p class="text-muted">{{ expense.updated_at|date:"j F Y" }}</p>
+                            <p class="text-muted mb-0">Amount: ₹{{ expense.amount }}</p>
+                          </div>
+                        </div>
+                      </div>
+                    {% empty %}
+                      <div class="preview-item">
+                        <div class="preview-item-content">
+                          <p class="text-muted">No expenses found.</p>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- content-wrapper ends -->
+    <footer class="footer">
+      <div class="d-sm-flex justify-content-center justify-content-sm-between">
+        <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © {{year_name}} <a href="https://www.bootstrapdash.com/" class="text-decoration-none" target="_blank">Navin Kumar</a>. All rights reserved.</span>
+        <span class="text-muted float-none float-sm-end d-block mt-1 mt-sm-0 text-center">Hand-crafted & made with <i class="mdi mdi-heart text-danger"></i></span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Custom Toast CSS -->
+  <style>
+    .custom-toast-container {
+      max-width: 350px;
+    }
+    .custom-toast {
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      min-width: 250px;
+    }
+    .custom-toast.show {
+      opacity: 1;
+    }
+    .custom-toast .btn-close {
+      cursor: pointer;
+    }
+  </style>
+
+  <!-- Custom Toast JavaScript -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const toasts = document.querySelectorAll('.custom-toast');
+      toasts.forEach(toast => {
+        // Show toast
+        setTimeout(() => {
+          toast.classList.add('show');
+        }, 100);
+
+        // Auto-hide after delay
+        const delay = parseInt(toast.getAttribute('data-delay')) || 5000;
+        setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => toast.remove(), 300); // Remove after fade-out
+        }, delay);
+      });
+    });
+  </script>
+  <script>
+    window.hasCategoryData = {{ has_category_data|yesno:"true,false" }};
+    window.categoryLabels = [
+        {% for cat in by_category %}
+            "{{ cat.category__category|escapejs }}",
+        {% endfor %}
+    ];
+    window.categoryData = [
+        {% for cat in by_category %}
+            {{ cat.total|floatformat:2 }},
+        {% endfor %}
+    ];
+    window.categoryColors = [
+        {% for cat in by_category %}
+            {% if forloop.counter0 == 0 %}"#D32F2F"{% elif forloop.counter0 == 1 %}"#1976D2"{% elif forloop.counter0 == 2 %}"#F57C00"{% elif forloop.counter0 == 3 %}"#388E3C"{% elif forloop.counter0 == 4 %}"#7B1FA2"{% elif forloop.counter0 == 5 %}"#C2185B"{% elif forloop.counter0 == 6 %}"#0288D1"{% elif forloop.counter0 == 7 %}"#FBC02D"{% elif forloop.counter0 == 8 %}"#455A64"{% elif forloop.counter0 == 9 %}"#AD1457"{% else %}"#{{ '456789AB'|random|random|random|random|random|random }}"{% endif %},
+        {% endfor %}
+    ];
+</script>
+{% endblock content %}

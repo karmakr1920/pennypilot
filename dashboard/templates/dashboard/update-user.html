@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>Update Profile - PennyPilot</title>
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/mdi/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/ti-icons/css/themify-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/css/vendor.bundle.base.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/css/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'dashboard/assets/images/favicon.png' %}" />
+  </head>
+  <body>
+    <div class="container-scroller">
+      <div class="container-fluid page-body-wrapper full-page-wrapper">
+        <div class="row w-100">
+          <div class="content-wrapper full-page-wrapper d-flex align-items-center auth login-bg">
+            <div class="card col-lg-6 mx-auto">
+              <div class="card-body px-3 py-3 px-md-5 py-md-5">
+                <h3 class="card-title text-start mb-3">Update Profile</h3>
+                <!-- Display messages -->
+                {% if messages %}
+                    <div class="alert alert-dismissible fade show text-md p-2">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                                <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="post" class="update-profile">
+                  {% csrf_token %}
+                  <div class="row">
+                      <div class="col-md-6 form-group">
+                          <label for="first_name">First Name</label>
+                          <input type="text" name="first_name" id="first_name" class="form-control p_input" autocomplete="off"
+                                value="{{ form_data.first_name|default:'' }}">
+                      </div>
+                      <div class="col-md-6 form-group">
+                          <label for="last_name">Last Name</label>
+                          <input type="text" name="last_name" id="last_name" class="form-control p_input" autocomplete="off"
+                                value="{{ form_data.last_name|default:'' }}">
+                      </div>
+                  </div>
+                  <div class="row">
+                      <div class="col-md-6 form-group">
+                          <label for="username">Username</label>
+                          <input type="text" name="username" id="username" class="form-control p_input" autocomplete="off"
+                                value="{{ form_data.username|default:'' }}">
+                      </div>
+                      <div class="col-md-6 form-group">
+                          <label for="email">Email</label>
+                          <input type="email" name="email" id="email" class="form-control p_input" autocomplete="off"
+                                value="{{ form_data.email|default:'' }}">
+                      </div>
+                  </div>
+                  <div class="row">
+                      <div class="col-md-6 form-group">
+                          <label for="current_password">Current Password</label>
+                          <input type="password" name="current_password" id="current_password" class="form-control p_input" autocomplete="off">
+                      </div>
+                      <div class="col-md-6 form-group">
+                          <label for="new_password">New Password</label>
+                          <input type="password" name="new_password" id="new_password" class="form-control p_input" autocomplete="off">
+                      </div>
+                  </div>
+                  <div class="text-center d-grid gap-2">
+                      <button type="submit" class="btn btn-primary btn-block">Update Profile</button>
+                  </div>
+                  <p class="text-center mt-3">
+                      <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                          <i class="mdi mdi-arrow-left me-2"></i>Back to Dashboard
+                      </a>
+                  </p>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="{% static 'dashboard/assets/vendors/js/vendor.bundle.base.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/off-canvas.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/misc.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/settings.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/todolist.js' %}"></script>
+  </body>
+</html>

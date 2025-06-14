@@ -1,0 +1,151 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>Add Expense - PennyPilot</title>
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/mdi/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/ti-icons/css/themify-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/css/vendor.bundle.base.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/vendors/font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/assets/css/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'dashboard/assets/images/favicon.png' %}" />
+  </head>
+  <body>
+    <div class="container-scroller">
+      <div class="container-fluid page-body-wrapper full-page-wrapper">
+        <div class="row w-100">
+          <div class="content-wrapper full-page-wrapper d-flex align-items-center auth login-bg">
+            <div class="card col-lg-4 mx-auto">
+              <div class="card-body px-5 py-5">
+                <h3 class="card-title text-start mb-3">Add Expense</h3>
+                <!-- Display messages -->
+                {% if messages %}
+                    <div class="alert alert-dismissible fade show">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="post" novalidate>
+                  {% csrf_token %}
+                  <div class="form-group">
+                    <label for="title">Title *</label>
+                    <input
+                      type="text"
+                      name="title"
+                      id="title"
+                      class="form-control p_input"
+                      required
+                    >
+                  </div>
+
+                  <div class="form-group">
+                    <label for="amount">Amount (₹) *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="amount"
+                      id="amount"
+                      class="form-control p_input"
+                      required
+                    >
+                  </div>
+
+                  <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea
+                      name="notes"
+                      id="notes"
+                      class="form-control p_input"
+                      style="height: 100px"
+                    ></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="category">Category *</label>
+                    <select
+                      name="category"
+                      id="category"
+                      class="form-control p_input"
+                      onchange="toggleNewCategoryInput()"
+                      required
+                    >
+                      <option value="" selected disabled>Select Category</option>
+                      {% for cat in categories %}
+                      <option value="{{ cat.id }}">{{ cat.category }}</option>
+                      {% endfor %}
+                      <option value="__new__">+ Add New Category</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group" id="new-category-wrapper" style="display: none">
+                    <label for="new-category-input">New Category Name</label>
+                    <input
+                      type="text"
+                      name="new_category"
+                      id="new-category-input"
+                      class="form-control p_input"
+                      autocomplete="off"
+                    >
+                  </div>
+
+                  <div class="form-group">
+                    <label for="paid_date">Payable Date *</label>
+                    <input
+                      type="date"
+                      name="paid_date"
+                      id="paid_date"
+                      class="form-control p_input"
+                      required
+                    >
+                  </div>
+
+                  <div class="text-center d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-block">Save Expense</button>
+                  </div>
+                  <p class="text-center mt-3">
+                <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}"          class="text-decoration-none">
+                    <i class="mdi mdi-arrow-left me-2"></i>Back
+                </a>
+
+                </p>
+                </form>
+              </div>
+            </div>
+          </div>
+          <!-- content-wrapper ends -->
+        </div>
+        <!-- row ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <script>
+      function toggleNewCategoryInput() {
+        const select = document.getElementById("category");
+        const newCategoryWrapper = document.getElementById("new-category-wrapper");
+        const newCategoryInput = document.getElementById("new-category-input");
+        if (select.value === "__new__") {
+          newCategoryWrapper.style.display = "block";
+          newCategoryInput.required = true;
+          select.required = false;
+        } else {
+          newCategoryWrapper.style.display = "none";
+          newCategoryInput.value = "";
+          newCategoryInput.required = false;
+          select.required = true;
+        }
+      }
+    </script>
+    <script src="{% static 'dashboard/assets/vendors/js/vendor.bundle.base.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/off-canvas.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/misc.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/settings.js' %}"></script>
+    <script src="{% static 'dashboard/assets/js/todolist.js' %}"></script>
+  </body>
+</html>
