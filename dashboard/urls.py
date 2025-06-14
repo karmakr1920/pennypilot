@@ -7,6 +7,7 @@ urlpatterns = [
     path('expense-report/', views.report_view, name='expense_report'),
     path('dashboard/', views.user_dashboard, name='dashboard'),
     path('add-expense/', views.add_expense, name='add_expense'),
+    path('terms/', views.terms, name='terms'),
     path('<int:exp_id>/update-expense/', views.update_expense, name='update_expense'),
     path('<int:exp_id>/delete-expense/', views.delete_expense, name='delete_expense'),
     path('report/', views.report_view, name='report'),

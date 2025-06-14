@@ -730,18 +730,25 @@
                 <h5>Links</h5>
                 <ul>
                     <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'login' %}">Login</a></li>
-                    <li><a href="{% url 'register' %}">Register</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                        <li><a href="{% url 'update_user' %}">Profile</a></li>
+                        <li><a href="{% url 'logout' %}">Logout</a></li>
+                    {% else %}
+                        <li><a href="{% url 'login' %}">Login</a></li>
+                        <li><a href="{% url 'register' %}">Register</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'terms' %}">Terms & Conditions</a></li>
                 </ul>
             </div>
             <div class="footer-column">
                 <h5>Contact</h5>
-                <p>Email: support@pennypilot.com</p>
-                <p>Phone: +91 123-456-7890</p>
+                <p>Email: naveen569652@gmail.com</p>
+                <p>Phone: +9125413556</p>
             </div>
         </div>
         <div class="footer-divider"></div>
-        <p class="footer-copyright">Copyright © {{year_name}} <a href="https://www.bootstrapdash.com/" class="text-decoration-none" target="_blank">Navin Kumar</a>. All rights reserved.</p>
+        <p class="footer-copyright">Copyright © {{year_name}} <a href="https://www.linkedin.com/in/navin-kumar-550377223/" class="text-decoration-none" target="_blank">Navin Kumar</a>. All rights reserved.</p>
     </footer>
 
     <script>

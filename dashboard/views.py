@@ -212,6 +212,16 @@ def index(request):
     }
     return render(request, 'dashboard/index.html',context)
 
+def terms(request):
+    today = datetime.today()
+    current_year = today.year
+
+    year_name = str(current_year)
+    context = {
+        'year_name': year_name
+    }
+    return render(request, 'dashboard/terms.html',context)
+
 
 @login_required(login_url='/login/')
 def expense_list(request):
