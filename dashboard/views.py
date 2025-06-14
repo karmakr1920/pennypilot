@@ -203,7 +203,14 @@ def login_view(request):
     return render(request, 'dashboard/login.html', {'form_data': {}})
 
 def index(request):
-    return render(request, 'dashboard/index.html')
+    today = datetime.today()
+    current_year = today.year
+
+    year_name = str(current_year)
+    context = {
+        'year_name': year_name
+    }
+    return render(request, 'dashboard/index.html',context)
 
 
 @login_required(login_url='/login/')
