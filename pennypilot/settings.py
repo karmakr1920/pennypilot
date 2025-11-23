@@ -65,13 +65,24 @@ TEMPLATES = [
 WSGI_APPLICATION = 'pennypilot.wsgi.application'
 
 # Database: PostgreSQL if DATABASE_URL is set, else fallback to SQLite
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-        ssl_require=True
-    )
-}
+USE_LOCAL_DB = os.getenv("USE_LOCAL_DB") == "True"
+
+if USE_LOCAL_DB:
+    # Local → SQLite
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+else:
+    # Production → PostgreSQL
+    DATABASES = {
+        "default": dj_database_url.config(
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

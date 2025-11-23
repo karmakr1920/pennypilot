@@ -90,7 +90,11 @@
             <ul class="navbar-nav w-100">
               <li class="nav-item w-100">
                 <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search">
-                  <input type="text" class="form-control" placeholder="Search Expense">
+                  <input type="text" name="q" value="{{ query|default:'' }}" class="form-control  me-2" placeholder="Search Expense">
+                  <button type="submit" class="btn btn-primary">Search</button>
+                  {% if query %}
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary ms-2">Clear</a>
+                  {% endif %}
                 </form>
               </li>
             </ul>

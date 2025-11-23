@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Expense, Category,User,MonthlyBudget,PasswordResetToken
-from django.db.models import Sum,Count
+from django.db.models import Sum,Count,Q
 from django.contrib import messages
 import calendar
 from django.utils.timezone import now, timedelta
@@ -11,12 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 import re
 import uuid
-from django.db.models import Q
-
-from django.contrib import messages
-from django.contrib.auth import login
 from django.contrib.auth.models import User
-import re
 
 def register_view(request):
     if request.user.is_authenticated:
@@ -239,6 +234,13 @@ def expense_list(request):
                                       paid_date__month=current_month).order_by('-paid_date')
     total_expenses = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
+    query = request.GET.get('q')
+    if query:
+        expenses = expenses.filter(
+            Q(title__icontains=query) |
+            Q(category__category__icontains=query) |
+            Q(notes__icontains=query)
+        )
     # Fetch user's monthly budget for current month/year
     try:
         monthly_budget_obj = MonthlyBudget.objects.get(user=user, year=current_year, month=current_month)
@@ -258,6 +260,7 @@ def expense_list(request):
         'monthly_budget': round(monthly_budget, 2),
         'remaining_budget': round(remaining_budget, 2),
         'month_name' : month_name,
+        'query' : query,
         'expenses': page_obj,  # Pass paginated expenses
         'page_obj': page_obj,  # For pagination controls
     }
@@ -282,6 +285,13 @@ def user_dashboard(request):
         paid_date__month=current_month
     ).order_by('-paid_date')
 
+    query = request.GET.get('q')
+    if query:
+        expenses = expenses.filter(
+            Q(title__icontains=query) |
+            Q(category__category__icontains=query) |
+            Q(notes__icontains=query)
+        )
     # Calculate total expenses
     total_expenses = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
@@ -314,6 +324,7 @@ def user_dashboard(request):
         'year_name': year_name,
         'expenses': page_obj,
         'page_obj': page_obj,
+        'query' : query,
         'by_category': list(by_category),  # Convert to list for template
         'has_category_data': bool(by_category),  # Explicitly convert to boolean
     }
